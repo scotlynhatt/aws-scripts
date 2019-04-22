@@ -13,12 +13,12 @@ export AWS_SECRET_ACCESS_KEY=
 
 QUERY="*"
 LAYOUTS=()
-INSTANCES=$(aws ec2 describe-instances --filters Name=tag-value,Values="${QUERY}" --output text --query 'Reservations[].Instances[].InstanceId' | awk '{print "\"" $1 "\""}')
+INSTANCES=$(aws ec2 describe-instances --filters Name=tag-value,Values="${QUERY}" --output text --query 'Reservations[].Instances[].InstanceId' --region ${AWS_DEFAULT_REGION})
 
 echo -e "${#INSTANCES[@]} instance count"
 
 for instance in "${INSTANCES[@]}"; do
-        LAYOUTS+=("$(aws ec2 describe-instances --instance-ids $instance --output text --query 'Reservations[*].Instances[*].[[InstanceId,Tags[?Key==`Name`].Value[],BlockDeviceMappings[].DeviceName]]' --region ${AWS_DEFAULT_REGION}| tr '[[:space:]]' ':' | awk '{print "\"" $1 "\""}' |sed 's/:"/"/g') ")
+        LAYOUTS+=("$(aws ec2 describe-instances --instance-ids $instance --output text --query 'Reservations[*].Instances[*].[[InstanceId,Tags[?Key==`Name`].Value[],BlockDeviceMappings[].DeviceName]]' --region ${AWS_DEFAULT_REGION} | tr '[[:space:]]' ':' | awk '{print "\"" $1 "\""}' |sed 's/:"/"/g') ")
 done
 
 for layout in "${LAYOUTS[@]}"; do
